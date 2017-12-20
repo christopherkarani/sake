@@ -4,7 +4,7 @@ import XCTest
 @testable import SakefileDescription
 
 final class SakeTests: XCTestCase {
-    
+
     enum Task: String, CustomStringConvertible {
         case a = "a"
         case b = "b_name"
@@ -15,30 +15,30 @@ final class SakeTests: XCTestCase {
             }
         }
     }
-    
+
     func test_runTask_runsEverythingInTheRightOrder() {
         var executionOutputs: [String] = []
-        let subject = Sake<Task> {
-            try $0.task(.a, dependencies: [.b]) { (_) in
-                executionOutputs.append("a")
-            }
-            try $0.task(.b) { (_) in
-                executionOutputs.append("b")
-            }
-            $0.beforeEach { (_) in
-                executionOutputs.append("before_each")
-            }
-            $0.beforeAll { (_) in
-                executionOutputs.append("before_all")
-            }
-            $0.afterEach { (_) in
-                executionOutputs.append("after_each")
-            }
-            $0.afterAll { (_) in
-                executionOutputs.append("after_all")
-            }
+        Sake<Task>(printer: { _ in },
+                   arguments: ["task", "a"]) {
+                    try $0.task(.a, dependencies: [.b]) { (_) in
+                        executionOutputs.append("a")
+                    }
+                    try $0.task(.b) { (_) in
+                        executionOutputs.append("b")
+                    }
+                    $0.beforeEach { (_) in
+                        executionOutputs.append("before_each")
+                    }
+                    $0.beforeAll { (_) in
+                        executionOutputs.append("before_all")
+                    }
+                    $0.afterEach { (_) in
+                        executionOutputs.append("after_each")
+                    }
+                    $0.afterAll { (_) in
+                        executionOutputs.append("after_all")
+                    }
         }
-        subject.run(arguments: ["task", "a"])
         XCTAssertEqual(executionOutputs, [
             "before_all",
             "before_each",
@@ -53,16 +53,16 @@ final class SakeTests: XCTestCase {
 
     func test_runTasks_printsTheCorrectString() {
         var printed: String!
-        let subject = Sake<Task>(printer: { printed = $0 }) {
+        let subject = Sake<Task>(printer: { printed = $0 },
+                                 arguments: ["tasks"]) {
             try $0.task(.a, dependencies: [.b]) { (_) in }
             try $0.task(.b) { _ in }
         }
-        subject.run(arguments: ["tasks"])
         let expected = """
 b_name:     b description
 a:          a description
 """
         XCTAssertEqual(printed, expected)
     }
-    
+
 }

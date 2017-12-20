@@ -75,6 +75,6 @@ Sake<Task> {
         try createVersion(version: nextVersion.string, branch: branch, utils: utils)
         try updateFormula(version: nextVersion.string, branch: branch, utils: utils)
     }
-}.run()
+}
 
 

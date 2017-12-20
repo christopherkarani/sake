@@ -13,30 +13,27 @@ public final class Sake<T: RawRepresentable & CustomStringConvertible> where T.R
     fileprivate let tasksInitializer: (Tasks<T>) throws -> Void
     fileprivate let printer: (String) -> Void
 
-    public init(tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
+    @discardableResult public init(tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
         self.tasksInitializer = tasksInitializer
         self.printer = { print($0) }
+        run()
     }
 
-    init(printer: @escaping (String) -> Void,
-         tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
+    @discardableResult init(printer: @escaping (String) -> Void,
+                            arguments: [String],
+                            tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
         self.tasksInitializer = tasksInitializer
         self.printer = printer
-    }
-
-    init(printer: @escaping (String) -> Void,
-         tasksInitializer: @escaping (Tasks<T>) -> Void) {
-        self.tasksInitializer = tasksInitializer
-        self.printer = printer
+        run(arguments: arguments)
     }
 
 }
 
 // MARK: - Sake (Runner)
 
-public extension Sake {
+extension Sake {
 
-    public func run() {
+    func run() {
         var arguments = CommandLine.arguments
         arguments.remove(at: 0)
         run(arguments: arguments)
@@ -47,7 +44,7 @@ public extension Sake {
             try tasksInitializer(tasks)
         } catch {
             printer("> Error initializing tasks: \(error)")
-            return
+            exit(1)
         }
         guard let argument = arguments.first else {
             printer("> Error: Missing argument")
