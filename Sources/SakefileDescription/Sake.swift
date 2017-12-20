@@ -12,18 +12,22 @@ public final class Sake<T: RawRepresentable & CustomStringConvertible> where T.R
     fileprivate let tasks: Tasks<T> = Tasks<T>()
     fileprivate let tasksInitializer: (Tasks<T>) throws -> Void
     fileprivate let printer: (String) -> Void
+    fileprivate let exiter: (Int32) -> ()
 
     @discardableResult public init(tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
         self.tasksInitializer = tasksInitializer
         self.printer = { print($0) }
+        self.exiter = { exit($0) }
         run()
     }
 
     @discardableResult init(printer: @escaping (String) -> Void,
+                            exiter: @escaping (Int32) -> (),
                             arguments: [String],
                             tasksInitializer: @escaping (Tasks<T>) throws -> Void) {
         self.tasksInitializer = tasksInitializer
         self.printer = printer
+        self.exiter = exiter
         run(arguments: arguments)
     }
 
@@ -36,6 +40,7 @@ extension Sake {
     func run() {
         var arguments = CommandLine.arguments
         arguments.remove(at: 0)
+        
         run(arguments: arguments)
     }
 
@@ -44,28 +49,32 @@ extension Sake {
             try tasksInitializer(tasks)
         } catch {
             printer("> Error initializing tasks: \(error)")
-            exit(1)
+            exiter(1)
+            return
         }
         guard let argument = arguments.first else {
             printer("> Error: Missing argument")
-            exit(1)
+            exiter(1)
+            return
         }
         if argument == "tasks" {
             printTasks()
         } else if argument == "task" {
             if arguments.count != 2 {
                 printer("> Error: Missing task name")
-                exit(1)
+                exiter(1)
+                return
             }
             do {
                 try runTaskAndDependencies(task: arguments[1])
             } catch {
                 printer("> Error: \(error)")
-                exit(1)
+                exiter(1)
+                return
             }
         } else {
             printer("> Error: Invalid argument")
-            exit(1)
+            exiter(1)
         }
     }
 

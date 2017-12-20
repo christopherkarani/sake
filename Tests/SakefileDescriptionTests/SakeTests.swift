@@ -19,6 +19,7 @@ final class SakeTests: XCTestCase {
     func test_runTask_runsEverythingInTheRightOrder() {
         var executionOutputs: [String] = []
         Sake<Task>(printer: { _ in },
+                   exiter: { _ in  },
                    arguments: ["task", "a"]) {
                     try $0.task(.a, dependencies: [.b]) { (_) in
                         executionOutputs.append("a")
@@ -53,7 +54,8 @@ final class SakeTests: XCTestCase {
 
     func test_runTasks_printsTheCorrectString() {
         var printed: String!
-        let subject = Sake<Task>(printer: { printed = $0 },
+        Sake<Task>(printer: { printed = $0 },
+                                 exiter: { _ in  },
                                  arguments: ["tasks"]) {
             try $0.task(.a, dependencies: [.b]) { (_) in }
             try $0.task(.b) { _ in }
