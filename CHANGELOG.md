@@ -7,6 +7,7 @@
 
 ### Added
 - Throw an error when trying to register the same task more than once https://github.com/xcodeswift/sake/pull/29 by @pepibumur.
+- It suggests an alternative task name when the user tries to execute a specific task and he misspells the task name https://github.com/xcodeswift/sake/pull/25 by @Juanpe.
 
 ## 0.2.0
 
