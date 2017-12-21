@@ -86,9 +86,26 @@ public extension Sake {
             })
             .joined(separator: "\n"))
     }
+    
+    fileprivate func printWarningTaskNotFound(_ task: String) {
+        var alertMessage = "> [!] Could not find task '\(task)'. "
+        if let suggestedTaskName = findSuggestionTaskName(for: task) {
+            alertMessage += "Maybe did you mean '\(suggestedTaskName)'?"
+        }
+        printer(alertMessage)
+    }
+    
+    fileprivate func findSuggestionTaskName(for task: String) -> String? {
+        let taskWithDistance = self.tasks.tasks.keys
+            .map { ($0, $0.levenshteinDistance(task)) }
+            .filter { $0.0.count != $0.1 }
+            .min { $0.1 < $1.1 }
+        return taskWithDistance?.0
+    }
 
     fileprivate func runTaskAndDependencies(task taskName: String) throws {
         guard let task = tasks.tasks.first(where: {$0.key == taskName}).map({$0.value}) else {
+            printWarningTaskNotFound(taskName)
             return
         }
         tasks.beforeAll.forEach({ $0(utils) })
@@ -97,8 +114,9 @@ public extension Sake {
         try runTask(task: taskName)
     }
 
-    fileprivate func runTask(task: String) throws {
-        guard let task = tasks.tasks.first(where: {$0.key == task}) else {
+    fileprivate func runTask(task taskName: String) throws {
+        guard let task = tasks.tasks.first(where: {$0.key == taskName}) else {
+            printWarningTaskNotFound(taskName)
             return
         }
         printer("> Running \"\(task.key)\"")
