@@ -65,4 +65,14 @@ a:          a description
         XCTAssertEqual(printed, expected)
     }
     
+    func test_runWrongTask_printSuggestedTaskName() {
+        var printed: String!
+        let subject = Sake<Task>(printer: { printed = $0 }) {
+            try $0.task(.a, dependencies: [.b]) { (_) in }
+            try $0.task(.b) { _ in }
+        }
+        subject.run(arguments: ["task", "_"])
+        let expected = "> [!] Could not find task '_'. Maybe did you mean 'b_name'?"
+        XCTAssertEqual(printed, expected)
+    }
 }
