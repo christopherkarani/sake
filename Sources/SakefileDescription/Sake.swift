@@ -88,9 +88,9 @@ public extension Sake {
     }
     
     fileprivate func printWarningTaskNotFound(_ task: String) {
-        var alertMessage = "> [!] Could not find task '\(task)'. "
+        var alertMessage = "> [!] Could not find task '\(task)'"
         if let suggestedTaskName = findSuggestionTaskName(for: task) {
-            alertMessage += "Maybe did you mean '\(suggestedTaskName)'?"
+            alertMessage += ". Maybe did you mean '\(suggestedTaskName)'?"
         }
         printer(alertMessage)
     }
